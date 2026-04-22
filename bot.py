@@ -8,8 +8,6 @@ from aiohttp import web
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from telegram.constants import ParseMode
-import nest_asyncio
-nest_asyncio.apply()
 
 TOKEN = "8605122850:AAFbRNdIJP0E-WsD7hHTFnOuYm7C0saJ-wA"
 
@@ -232,10 +230,7 @@ async def start_web():
 
 # ================== ЗАПУСК ==================
 async def main():
-    # Запускаем веб-сервер в фоне
     asyncio.create_task(start_web())
-    
-    # Запускаем бота
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("stop", stop_attack))
@@ -247,11 +242,8 @@ async def main():
     app.add_handler(CallbackQueryHandler(cancel_callback, pattern="^cancel$"))
     app.add_handler(CallbackQueryHandler(back_to_url_callback, pattern="^back_to_url$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
-    
     logger.info("🔥 DDOS VISUAL SIMULATOR БОТ ЗАПУЩЕН")
     await app.run_polling()
 
 if __name__ == "__main__":
-    # Используем nest_asyncio для возможности повторного запуска цикла
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
