@@ -2,9 +2,7 @@
 import asyncio
 import random
 import logging
-import os
 from datetime import datetime
-from aiohttp import web
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from telegram.constants import ParseMode
@@ -212,23 +210,7 @@ async def back_to_url_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         parse_mode=ParseMode.MARKDOWN
     )
 
-# ================== ВЕБ-СЕРВЕР ДЛЯ HEALTHCHECK ==================
-async def health(request):
-    return web.Response(text="OK")
-
-# ================== ЗАПУСК ==================
-async def main():
-    # Запускаем веб-сервер в фоне
-    web_app = web.Application()
-    web_app.router.add_get('/health', health)
-    runner = web.AppRunner(web_app)
-    await runner.setup()
-    port = int(os.environ.get("PORT", 8080))
-    site = web.TCPSite(runner, '0.0.0.0', port)
-    await site.start()
-    logger.info(f"🌐 Веб-сервер для healthcheck запущен на порту {port}")
-    
-    # Запускаем Telegram бота
+def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("stop", stop_attack))
@@ -241,9 +223,7 @@ async def main():
     app.add_handler(CallbackQueryHandler(back_to_url_callback, pattern="^back_to_url$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
     logger.info("🔥 DDOS VISUAL SIMULATOR БОТ ЗАПУЩЕН")
-    
-    # Запускаем бота (блокирующий вызов)
-    await app.run_polling()
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
